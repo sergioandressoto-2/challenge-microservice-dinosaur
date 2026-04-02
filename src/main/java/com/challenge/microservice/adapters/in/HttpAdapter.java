@@ -1,52 +1,57 @@
 package com.challenge.microservice.adapters.in;
 
-import com.challenge.microservice.application.DinosaurService;
 import com.challenge.microservice.application.dto.DinosaurRequest;
 import com.challenge.microservice.application.dto.DinosaurResponse;
-import com.challenge.microservice.port.http.HttpPort;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.challenge.microservice.application.port.in.CreateDinosaurUseCase;
+import com.challenge.microservice.application.port.in.GetDinosaurUseCase;
+import com.challenge.microservice.application.port.in.GetDinosaursUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/")
-public class HttpAdapter implements HttpPort {
+@RequestMapping("/api/v1")
+public class HttpAdapter {
 
-    @Autowired
-    private DinosaurService service;
+    private final CreateDinosaurUseCase createDinosaurUseCase;
+    private final GetDinosaursUseCase getDinosaursUseCase;
+    private final GetDinosaurUseCase getDinosaurUseCase;
 
-    @Override
-    public ResponseEntity<String> createDinosaur(DinosaurRequest dinosaurRequest) {
-
-        service.createDinosaur(dinosaurRequest);
-
-        return new ResponseEntity<>("Dinosaur Saved Sucessfull", HttpStatus.CREATED);
+    public HttpAdapter(CreateDinosaurUseCase createDinosaurUseCase,
+                       GetDinosaursUseCase getDinosaursUseCase,
+                       GetDinosaurUseCase getDinosaurUseCase) {
+        this.createDinosaurUseCase = createDinosaurUseCase;
+        this.getDinosaursUseCase = getDinosaursUseCase;
+        this.getDinosaurUseCase = getDinosaurUseCase;
     }
 
-    @Override
+    @PostMapping("/dinosaur")
+    public ResponseEntity<String> createDinosaur(@RequestBody DinosaurRequest dinosaurRequest) {
+        createDinosaurUseCase.createDinosaur(dinosaurRequest);
+        return new ResponseEntity<>("Dinosaur Saved Successfully", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/dinosaur")
     public ResponseEntity<List<DinosaurResponse>> returnDinosaurs() {
-        return ResponseEntity.ok(service.returnDinosaurs());
+        return ResponseEntity.ok(getDinosaursUseCase.getDinosaurs());
     }
 
-    @Override
-    public ResponseEntity<DinosaurResponse> returnDinosaur(String id) {
-
-        return service.returnDinosaur(id)
+    @GetMapping("/dinosaur/{id}")
+    public ResponseEntity<DinosaurResponse> returnDinosaur(@PathVariable Long id) {
+        return getDinosaurUseCase.getDinosaur(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @Override
-    public String updateDinosaur(String id, DinosaurRequest dinosaurRequest) {
+    @PutMapping("/dinosaur/{id}")
+    public String updateDinosaur(@PathVariable Long id, @RequestBody DinosaurRequest dinosaurRequest) {
         return "";
     }
 
-    @Override
-    public String deleteDinosaur(String id) {
+    @DeleteMapping("/dinosaur/{id}")
+    public String deleteDinosaur(@PathVariable Long id) {
         return "";
     }
 }

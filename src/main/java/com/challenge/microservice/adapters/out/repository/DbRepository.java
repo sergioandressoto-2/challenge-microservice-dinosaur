@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DbRepository extends JpaRepository<DinosaurEntity, String> {
+public interface DbRepository extends JpaRepository<DinosaurEntity, Long> {
 
 }
 

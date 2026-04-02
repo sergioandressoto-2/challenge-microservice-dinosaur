@@ -1,72 +1,68 @@
 package com.challenge.microservice.application;
 
-
-import com.challenge.microservice.domain.Dinosaur;
 import com.challenge.microservice.application.dto.DinosaurRequest;
 import com.challenge.microservice.application.dto.DinosaurResponse;
-import com.challenge.microservice.port.db.DbPort;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.challenge.microservice.application.port.in.CreateDinosaurUseCase;
+import com.challenge.microservice.application.port.in.GetDinosaurUseCase;
+import com.challenge.microservice.application.port.in.GetDinosaursUseCase;
+import com.challenge.microservice.application.port.out.DinosaurRepositoryPort;
+import com.challenge.microservice.domain.Dinosaur;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 
 @Service
-public class DinosaurService {
+public class DinosaurService implements CreateDinosaurUseCase, GetDinosaursUseCase, GetDinosaurUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(DinosaurService.class);
 
-    @Autowired
-    private DbPort dbPort;
+    private final DinosaurRepositoryPort repositoryPort;
 
-    public String createDinosaur(DinosaurRequest dinosaurReq) {
-        log.info("dinosaur object receive: {}, {}", dinosaurReq.getDiscoveryDate(), dinosaurReq.getName());
-        // TODO validar los datos de entrada
-        // TDOD Regla: Nombre único (Validación de contexto)
-        /*
-        if (repository.existsByName(command.name())) {
-            throw new AlreadyExistsException("Dinosaur name already taken.");
-        }
-        */
-        Dinosaur dinosaur = new Dinosaur (
-                dinosaurReq.getName(),
-                dinosaurReq.getSpecies(),
-                dinosaurReq.getDiscoveryDate(),
-                dinosaurReq.getExtinctionDate()
+    public DinosaurService(DinosaurRepositoryPort repositoryPort) {
+        this.repositoryPort = repositoryPort;
+    }
+
+    @Override
+    public void createDinosaur(DinosaurRequest req) {
+        log.info("Creating dinosaur: {}, {}", req.getName(), req.getDiscoveryDate());
+        // TODO: validar nombre único (req. de negocio pendiente)
+        Dinosaur dinosaur = new Dinosaur(
+                req.getName(),
+                req.getSpecies(),
+                req.getDiscoveryDate(),
+                req.getExtinctionDate()
         );
-        dbPort.create(dinosaur);
-        return "OK";
+        repositoryPort.save(dinosaur);
     }
 
-    /*
-    public DinosaurResponse updateDinosaur(DinosaurRequest dinosaur) {
-
-        return "";
-    }
-    */
-
-    public List<DinosaurResponse> returnDinosaurs() {
-        log.info("Return list of dinosarus from db");
-        return dbPort.returnDinosaurs();
+    @Override
+    public List<DinosaurResponse> getDinosaurs() {
+        log.info("Returning list of dinosaurs from db");
+        return repositoryPort.findAll()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-
-    public Optional<DinosaurResponse> returnDinosaur(String idDinosaur) {
-        // findbyid if existe return a object found.
-        log.info("Return a dinosarus from db");
-        return dbPort.getDinosaur(idDinosaur);
+    @Override
+    public Optional<DinosaurResponse> getDinosaur(Long id) {
+        log.info("Returning dinosaur from db, id: {}", id);
+        return repositoryPort.findById(id)
+                .map(this::toResponse);
     }
 
-    /*
-
-     public String deleteDinosaur(String idDinosaur) {
-
+    private DinosaurResponse toResponse(Dinosaur dinosaur) {
+        DinosaurResponse response = new DinosaurResponse();
+        response.setId(dinosaur.getId());
+        response.setName(dinosaur.getName());
+        response.setSpecies(dinosaur.getSpecies());
+        response.setDiscoveryDate(dinosaur.getDiscoveryDate());
+        response.setExtinctionDate(dinosaur.getExtinctionDate());
+        response.setStatus(dinosaur.getStatus().toString());
+        return response;
     }
- */
-
-
 }

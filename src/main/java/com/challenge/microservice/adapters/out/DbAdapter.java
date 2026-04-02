@@ -2,69 +2,61 @@ package com.challenge.microservice.adapters.out;
 
 import com.challenge.microservice.adapters.out.model.DinosaurEntity;
 import com.challenge.microservice.adapters.out.repository.DbRepository;
+import com.challenge.microservice.application.port.out.DinosaurRepositoryPort;
 import com.challenge.microservice.domain.Dinosaur;
-import com.challenge.microservice.application.dto.DinosaurResponse;
-import com.challenge.microservice.port.db.DbPort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import com.challenge.microservice.domain.Status;
+import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
-public class DbAdapter implements DbPort{
+@Component
+public class DbAdapter implements DinosaurRepositoryPort {
 
-    @Autowired
-    private DbRepository dbRepository;
+    private final DbRepository dbRepository;
 
-    @Override
-    public void create(Dinosaur dinosaur) {
-        DinosaurEntity entity = mapDinosaurToDinosaurEntity(dinosaur);
-        dbRepository.save(entity);
+    public DbAdapter(DbRepository dbRepository) {
+        this.dbRepository = dbRepository;
     }
 
     @Override
-    public void updateStatus(String id, String status) {
-
+    public void save(Dinosaur dinosaur) {
+        dbRepository.save(mapDomainToEntity(dinosaur));
     }
 
     @Override
-    public List<DinosaurResponse> returnDinosaurs() {
+    public List<Dinosaur> findAll() {
         return dbRepository.findAll()
                 .stream()
-                .map(this::mapDinosaurEntityToDinosaurResponse)
+                .map(this::mapEntityToDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<DinosaurResponse> getDinosaur(String id) {
+    public Optional<Dinosaur> findById(Long id) {
         return dbRepository.findById(id)
-                .map(this::mapDinosaurEntityToDinosaurResponse);
-
+                .map(this::mapEntityToDomain);
     }
 
-    private DinosaurEntity mapDinosaurToDinosaurEntity(Dinosaur dinosaurReq){
-        DinosaurEntity dinosaurEntity = new DinosaurEntity();
-        dinosaurEntity.setName(dinosaurReq.getName());
-        dinosaurEntity.setSpecies(dinosaurReq.getSpecies());
-        dinosaurEntity.setDiscoveryDate(dinosaurReq.getDiscoveryDate());
-        dinosaurEntity.setExtinctionDate(dinosaurReq.getExtinctionDate());
-        dinosaurEntity.setStatus(dinosaurReq.getStatus());
-        return dinosaurEntity;
+    private DinosaurEntity mapDomainToEntity(Dinosaur dinosaur) {
+        DinosaurEntity entity = new DinosaurEntity();
+        entity.setName(dinosaur.getName());
+        entity.setSpecies(dinosaur.getSpecies());
+        entity.setDiscoveryDate(dinosaur.getDiscoveryDate());
+        entity.setExtinctionDate(dinosaur.getExtinctionDate());
+        entity.setStatus(dinosaur.getStatus().toString());
+        return entity;
     }
 
-    private DinosaurResponse mapDinosaurEntityToDinosaurResponse(DinosaurEntity dinosaurEntity){
-        DinosaurResponse dinosaurResponse = new DinosaurResponse();
-        dinosaurResponse.setName(dinosaurEntity.getName());
-        dinosaurResponse.setSpecies(dinosaurEntity.getSpecies());
-        dinosaurResponse.setDiscoveryDate(dinosaurEntity.getDiscoveryDate());
-        dinosaurResponse.setExtinctionDate(dinosaurEntity.getExtinctionDate());
-        dinosaurResponse.setStatus(dinosaurEntity.getStatus());
-        dinosaurResponse.setId(dinosaurEntity.getId());
-        return dinosaurResponse;
+    private Dinosaur mapEntityToDomain(DinosaurEntity entity) {
+        return new Dinosaur(
+                entity.getId(),
+                entity.getName(),
+                entity.getSpecies(),
+                entity.getDiscoveryDate(),
+                entity.getExtinctionDate(),
+                Status.valueOf(entity.getStatus())
+        );
     }
 }
