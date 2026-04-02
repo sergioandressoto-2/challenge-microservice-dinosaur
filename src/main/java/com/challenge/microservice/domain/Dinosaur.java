@@ -32,14 +32,16 @@ public class Dinosaur {
           this.status = status;
      }
 
-     public void updateDetails(String species, Date discovery, Date extinction) {
+     public void updateDetails(String name, String species, Date discovery, Date extinction, Status status) {
           if (this.status == Status.EXTINCT) {
                throw new DomainException("Cannot update an extinct dinosaur.");
           }
           validateDates(discovery, extinction);
+          this.name = name;
           this.species = species;
           this.discoveryDate = discovery;
           this.extinctionDate = extinction;
+          this.status = status;
      }
 
      private void validateDates(Date discovery, Date extinction) {

@@ -39,8 +39,19 @@ public class DbAdapter implements DinosaurRepositoryPort {
                 .map(this::mapEntityToDomain);
     }
 
+    @Override
+    public boolean existsByName(String name) {
+        return dbRepository.existsByName(name);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        dbRepository.deleteById(id);
+    }
+
     private DinosaurEntity mapDomainToEntity(Dinosaur dinosaur) {
         DinosaurEntity entity = new DinosaurEntity();
+        entity.setId(dinosaur.getId());
         entity.setName(dinosaur.getName());
         entity.setSpecies(dinosaur.getSpecies());
         entity.setDiscoveryDate(dinosaur.getDiscoveryDate());
