@@ -7,6 +7,7 @@ import com.challenge.microservice.domain.Dinosaur;
 import com.challenge.microservice.domain.Status;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,6 +48,22 @@ public class DbAdapter implements DinosaurRepositoryPort {
     @Override
     public void deleteById(Long id) {
         dbRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Dinosaur> findNonExtinctWithExtinctionDateBefore(Date date) {
+        return dbRepository.findByStatusNotAndExtinctionDateLessThanEqual(Status.EXTINCT.name(), date)
+                .stream()
+                .map(this::mapEntityToDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Dinosaur> findAliveWithExtinctionDateBetween(Date from, Date to) {
+        return dbRepository.findAliveWithExtinctionDateBetween(Status.ALIVE.name(), from, to)
+                .stream()
+                .map(this::mapEntityToDomain)
+                .collect(Collectors.toList());
     }
 
     private DinosaurEntity mapDomainToEntity(Dinosaur dinosaur) {
