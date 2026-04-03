@@ -3,6 +3,7 @@ package com.challenge.microservice.application;
 import com.challenge.microservice.application.dto.DinosaurRequest;
 import com.challenge.microservice.application.dto.DinosaurResponse;
 import com.challenge.microservice.application.port.out.DinosaurRepositoryPort;
+import com.challenge.microservice.application.port.out.NotificationPort;
 import com.challenge.microservice.domain.Dinosaur;
 import com.challenge.microservice.domain.DinosaurNotFoundException;
 import com.challenge.microservice.domain.DomainException;
@@ -27,6 +28,9 @@ class DinosaurServiceTest {
 
     @Mock
     private DinosaurRepositoryPort repositoryPort;
+
+    @Mock
+    private NotificationPort notificationPort;
 
     @InjectMocks
     private DinosaurService service;
