@@ -37,7 +37,7 @@ public class DinosaurService implements CreateDinosaurUseCase, GetDinosaursUseCa
     }
 
     @Override
-    public void createDinosaur(DinosaurRequest req) {
+    public DinosaurResponse createDinosaur(DinosaurRequest req) {
         log.info("Creating dinosaur: {}, {}", req.getName(), req.getDiscoveryDate());
         if (repositoryPort.existsByName(req.getName())) {
             throw new DomainException("Dinosaur name already exists: " + req.getName());
@@ -48,7 +48,8 @@ public class DinosaurService implements CreateDinosaurUseCase, GetDinosaursUseCa
                 req.getDiscoveryDate(),
                 req.getExtinctionDate()
         );
-        repositoryPort.save(dinosaur);
+        Dinosaur saved = repositoryPort.save(dinosaur);
+        return toResponse(saved);
     }
 
     @Override

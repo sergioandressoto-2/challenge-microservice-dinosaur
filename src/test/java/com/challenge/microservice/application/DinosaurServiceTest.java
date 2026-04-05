@@ -64,12 +64,17 @@ class DinosaurServiceTest {
 
     @Test
     void createDinosaur_savesWhenNameIsUnique() {
+        Dinosaur saved = new Dinosaur(1L, "T-Rex", "Tyrannosaurus", past, future, Status.ALIVE);
         when(repositoryPort.existsByName("T-Rex")).thenReturn(false);
+        when(repositoryPort.save(any(Dinosaur.class))).thenReturn(saved);
         DinosaurRequest req = buildRequest("T-Rex", "Tyrannosaurus", past, future, "ALIVE");
 
-        service.createDinosaur(req);
+        DinosaurResponse response = service.createDinosaur(req);
 
         verify(repositoryPort).save(any(Dinosaur.class));
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getName()).isEqualTo("T-Rex");
+        assertThat(response.getStatus()).isEqualTo("ALIVE");
     }
 
     @Test

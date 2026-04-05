@@ -22,8 +22,9 @@ public class DbAdapter implements DinosaurRepositoryPort {
     }
 
     @Override
-    public void save(Dinosaur dinosaur) {
-        dbRepository.save(mapDomainToEntity(dinosaur));
+    public Dinosaur save(Dinosaur dinosaur) {
+        DinosaurEntity saved = dbRepository.save(mapDomainToEntity(dinosaur));
+        return mapEntityToDomain(saved);
     }
 
     @Override

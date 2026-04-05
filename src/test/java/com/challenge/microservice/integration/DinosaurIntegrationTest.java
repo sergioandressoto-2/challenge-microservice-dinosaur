@@ -79,7 +79,10 @@ class DinosaurIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(buildRequest("T-Rex", "Tyrannosaurus", past, future))))
                 .andExpect(status().isCreated())
-                .andExpect(content().string("Dinosaur Saved Successfully"));
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.name", is("T-Rex")))
+                .andExpect(jsonPath("$.species", is("Tyrannosaurus")))
+                .andExpect(jsonPath("$.status", is("ALIVE")));
     }
 
     @Test
@@ -104,7 +107,8 @@ class DinosaurIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(req)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(content().string(containsString("T-Rex")));
+                .andExpect(jsonPath("$.code", is(422)))
+                .andExpect(jsonPath("$.message", containsString("T-Rex")));
     }
 
     @Test
@@ -113,7 +117,8 @@ class DinosaurIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(buildRequest("T-Rex", "Tyrannosaurus", future, past))))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(content().string(containsString("discoveryDate must be before extinction date")));
+                .andExpect(jsonPath("$.code", is(422)))
+                .andExpect(jsonPath("$.message", containsString("discoveryDate must be before extinction date")));
     }
 
     @Test
@@ -204,8 +209,7 @@ class DinosaurIntegrationTest {
         mockMvc.perform(put("/api/v1/dinosaur/{id}", savedId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(buildRequest("T-Rex Updated", "New Species", past, future, "ENDANGERED"))))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Dinosaur Updated Successfully"));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -233,7 +237,8 @@ class DinosaurIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(buildRequest("T-Rex", "Tyrannosaurus", past, future))))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString("9999")));
+                .andExpect(jsonPath("$.code", is(404)))
+                .andExpect(jsonPath("$.message", containsString("9999")));
     }
 
     @Test
@@ -252,7 +257,8 @@ class DinosaurIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(buildRequest("T-Rex", "Tyrannosaurus", past, future, "ALIVE"))))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(content().string(containsString("Cannot update an extinct dinosaur")));
+                .andExpect(jsonPath("$.code", is(422)))
+                .andExpect(jsonPath("$.message", containsString("Cannot update an extinct dinosaur")));
     }
 
     @Test
@@ -295,8 +301,7 @@ class DinosaurIntegrationTest {
                 .content(toJson(buildRequest("T-Rex", "Tyrannosaurus", past, future))));
 
         mockMvc.perform(delete("/api/v1/dinosaur/{id}", savedId()))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Dinosaur Deleted Successfully"));
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -316,7 +321,8 @@ class DinosaurIntegrationTest {
     void deleteDinosaur_returns404_whenNotFound() throws Exception {
         mockMvc.perform(delete("/api/v1/dinosaur/{id}", 9999L))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString("9999")));
+                .andExpect(jsonPath("$.code", is(404)))
+                .andExpect(jsonPath("$.message", containsString("9999")));
     }
 
     @Test
@@ -332,6 +338,6 @@ class DinosaurIntegrationTest {
                 .content(toJson(buildRequest("T-Rex", "Tyrannosaurus", past, future, "EXTINCT"))));
 
         mockMvc.perform(delete("/api/v1/dinosaur/{id}", id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 }
