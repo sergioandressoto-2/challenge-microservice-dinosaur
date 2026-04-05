@@ -67,6 +67,12 @@ public class DbAdapter implements DinosaurRepositoryPort {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean isConnected() {
+        dbRepository.count();
+        return true;
+    }
+
     private DinosaurEntity mapDomainToEntity(Dinosaur dinosaur) {
         DinosaurEntity entity = new DinosaurEntity();
         entity.setId(dinosaur.getId());

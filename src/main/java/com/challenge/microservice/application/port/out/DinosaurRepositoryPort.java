@@ -14,4 +14,5 @@ public interface DinosaurRepositoryPort {
     void deleteById(Long id);
     List<Dinosaur> findNonExtinctWithExtinctionDateBefore(Date date);
     List<Dinosaur> findAliveWithExtinctionDateBetween(Date from, Date to);
+    boolean isConnected();
 }
