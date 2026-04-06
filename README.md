@@ -1,22 +1,23 @@
 # Dinosaur Microservice
 
-Breve descripción del propósito del servicio.
+Microservicio que permite el AMB de dinosaurios. 
+El proyecto sigue los lineamientos de una arquitectura Hexagonal 
 
 ---
 
 ## Stack tecnológico
 
-| Tecnología      | Versión  | Rol                              |
-|-----------------|----------|----------------------------------|
-| Java            | 21       | Lenguaje                         |
-| Spring Boot     | 4.0.5    | Framework principal              |
-| Spring Data JPA | —        | Persistencia                     |
-| PostgreSQL      | 17       | Base de datos                    |
-| RabbitMQ        | alpine   | Message broker                   |
-| Maven           | 3.9+     | Build tool                       |
-| Docker          | 29+      | Contenerización                  |
-| Docker Compose  | —        | Orquestación local               |
-| H2              | —        | Base de datos en memoria (tests) |
+| Tecnología      | Versión | Rol                              |
+|-----------------|---------|----------------------------------|
+| Java            | 21      | Lenguaje                         |
+| Spring Boot     | 4.0.5   | Framework principal              |
+| Spring Data JPA | 4.0.4   | Persistencia                     |
+| PostgreSQL      | 17      | Base de datos                    |
+| RabbitMQ        | alpine  | Message broker                   |
+| Maven           | 3.9+    | Build tool                       |
+| Docker          | 29+     | Contenerización                  |
+| Docker Compose  | —       | Orquestación local               |
+| H2              | —       | Base de datos en memoria (tests) |
 
 ---
 
@@ -68,14 +69,31 @@ cd challenge-microservice-dinosaur
 Copiar el archivo de ejemplo y completar los valores:
 
 ```bash
-cp .env.example .env
+cp .env_template .env
 ```
 
----
+```bash
+APP_PORT=8080
+
+DB_NAME=<dbname>
+DB_USERNAME=postgres
+DB_PASSWORD=<password>
+DB_PORT=5432 # default
+
+JPA_DDL_AUTO=update
+JPA_SHOW_SQL=true  # development
+
+RABBITMQ_USERNAME=admin
+RABBITMQ_PASSWORD=admin
+RABBITMQ_PORT=5672
+
+# Scheduler
+SCHEDULER_CRON=0 */10 * * * *
+```
 
 ## Ejecución
 
-### Con Docker Compose (recomendado)
+### Con Docker Compose 
 
 Levanta la app, PostgreSQL y RabbitMQ en un solo comando:
 
@@ -91,7 +109,7 @@ docker compose up --build -d
 
 Para detener y eliminar contenedores:
 
-```bash
+```bash[docker-compose.yml](docker-compose.yml)
 docker compose down
 ```
 
@@ -100,16 +118,6 @@ Para detener y eliminar contenedores **y volúmenes** (resetea la base de datos)
 ```bash
 docker compose down -v
 ```
-
-### En local (sin Docker)
-
-Requisitos adicionales: PostgreSQL corriendo en `localhost:5432` y RabbitMQ en `localhost:5672`.
-
-```bash
-mvn spring-boot:run
-```
-
----
 
 ## API REST
 
@@ -123,7 +131,13 @@ Base path: `/api/v1/dinosaur`
 | PUT    | `/{id}`   | Actualizar dinosaurio        | 200    |
 | DELETE | `/{id}`   | Eliminar dinosaurio          | 200    |
 
-swagger path: http:localhost:8080/swagger-ui.html
+Endpoint health para chequear el estado de la aplicación y conexión a base de datos
+se puede ejecutar con: 
+
+```bash
+curl --location 'http://localhost:8080/actuator/health'
+```
+swagger path: **http:localhost:8080/swagger-ui.html**
 
 ### Ejemplo de request (POST / PUT)
 
@@ -146,6 +160,9 @@ swagger path: http:localhost:8080/swagger-ui.html
 | `EXTINCT`    | Transición automática al alcanzar `extinctionDate` |
 
 ---
+### Collection Postman para test
+Se encuentra disponible en el repositorio el archivo
+Dinosaur_API.postman_collection.json
 
 ## Reglas de negocio
 
@@ -211,8 +228,8 @@ mvn test -Dtest=DinosaurServiceTest#createDinosaur_savesWhenNameIsUnique
 | `DinosaurApplicationTests`  | Smoke test  | Carga del contexto de Spring              |
 
 ---
-
-## Verificación del broker
+**NOTA:** He intentado utilizar Testcontainers con @ServiceConnection, no he logrado dejarlo funcional por problemas de comunicacion con maven y docker api al instanciar los containers.
+He decidio continuar modificando los test de integración utilizando H2 para la base de datos en memoria. 
 
 ```bash
 # Ver exchanges
@@ -235,47 +252,15 @@ Ejemplo:
 
 ---
 
-## Estructura del proyecto
+## Mejoras para aplicar y comentarios
 
-```
-src/
-├── main/
-│   ├── java/com/challenge/microservice/
-│   │   ├── adapters/
-│   │   │   ├── in/
-│   │   │   │   ├── HttpAdapter.java
-│   │   │   │   ├── SchedulerAdapter.java
-│   │   │   │   └── messaging/
-│   │   │   │       └── NotificationListener.java
-│   │   │   └── out/
-│   │   │       ├── DbAdapter.java
-│   │   │       ├── messaging/
-│   │   │       │   ├── RabbitMQConfig.java
-│   │   │       │   └── RabbitMQNotificationAdapter.java
-│   │   │       ├── model/
-│   │   │       │   └── DinosaurEntity.java
-│   │   │       └── repository/
-│   │   │           └── DbRepository.java
-│   │   ├── application/
-│   │   │   ├── DinosaurService.java
-│   │   │   ├── DinosaurSchedulerService.java
-│   │   │   ├── dto/
-│   │   │   └── port/
-│   │   │       ├── in/
-│   │   │       └── out/
-│   │   ├── domain/
-│   │   │   ├── Dinosaur.java
-│   │   │   ├── Status.java
-│   │   │   └── ...
-│   │   └── DinosaurApplication.java
-│   └── resources/
-│       └── application.properties
-└── test/
-    ├── java/com/challenge/microservice/
-    │   ├── application/DinosaurServiceTest.java
-    │   ├── domain/DinosaurTest.java
-    │   ├── dinosaur/DinosaurApplicationTests.java
-    │   └── integration/DinosaurIntegrationTest.java
-    └── resources/
-        ├── application-test.properties
-```
+1. Generar proyecto Apache Jmeter o postman 
+Para realizar pruebas de carga automatizadas, 
+simulando carga progresivamente para testear el comportamiento de la API.
+
+2. Para el proceso automatico @scheduler actualmente se utilizó el annotation para el challenge. Para produccion
+si se tienen mas instancias de la aplicacion puede traer problemas (correrían en todas las instancias a la vez), se podria utilizar libreria como ShedLock o el framework QUARTZ.
+3. Implementar test de integración con Testcontainers para probar la db y broker rabbitmq ( actualmente se intento pero no se logro integrar correctamente).
+4. Agregar plugin maven JaCoCo para cobertura de tests
+5. Asegurar Api implementando Spring Security con JWT o utilizar un producto como keycloak para produccion.
+
