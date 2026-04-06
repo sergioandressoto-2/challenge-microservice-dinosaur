@@ -75,13 +75,13 @@ cp .env_template .env
 ```bash
 APP_PORT=8080
 
-DB_NAME=<dbname>
+DB_NAME=<dbname> # ej: db1
 DB_USERNAME=postgres
-DB_PASSWORD=<password>
-DB_PORT=5432 # default
+DB_PASSWORD=<password> # crea un password
+DB_PORT=5432 # puerto default 
 
 JPA_DDL_AUTO=update
-JPA_SHOW_SQL=true  # development
+JPA_SHOW_SQL=true  # true solo para development
 
 RABBITMQ_USERNAME=admin
 RABBITMQ_PASSWORD=admin
