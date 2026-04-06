@@ -9,6 +9,12 @@ import com.challenge.microservice.application.port.in.ReadDinosaurUseCase;
 import com.challenge.microservice.application.port.in.UpdateDinosaurUseCase;
 import com.challenge.microservice.domain.DinosaurNotFoundException;
 import com.challenge.microservice.domain.DomainException;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Gestión de Dinosaurios", description = "API para crear, leer, actualizar y borrar Dinosaurios")
 public class HttpAdapter {
 
     private final CreateDinosaurUseCase createDinosaurUseCase;
@@ -35,6 +42,10 @@ public class HttpAdapter {
     }
 
     @PostMapping("/dinosaur")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created"),
+            @ApiResponse(responseCode = "422", description = "Not Created, Unproccesable entity.")
+    })
     public ResponseEntity<?> createDinosaur(@RequestBody DinosaurRequest dinosaurRequest) {
         try {
             DinosaurResponse created = createDinosaurUseCase.createDinosaur(dinosaurRequest);
@@ -46,11 +57,18 @@ public class HttpAdapter {
     }
 
     @GetMapping("/dinosaur")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucessfull")
+    })
     public ResponseEntity<List<DinosaurResponse>> returnDinosaurs() {
         return ResponseEntity.ok(readDinosaurUseCase.getDinosaurs());
     }
 
     @GetMapping("/dinosaur/{id}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucessfull"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
     public ResponseEntity<?> returnDinosaur(@PathVariable Long id) {
         return readDinosaurUseCase.getDinosaur(id)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
@@ -59,6 +77,11 @@ public class HttpAdapter {
     }
 
     @PutMapping("/dinosaur/{id}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucessfull"),
+            @ApiResponse(responseCode = "422", description = "Not Created, Unproccesable entity."),
+            @ApiResponse(responseCode = "404", description = "Not found")
+    })
     public ResponseEntity<?> updateDinosaur(@PathVariable Long id, @RequestBody DinosaurRequest dinosaurRequest) {
         try {
             updateDinosaurUseCase.updateDinosaur(id, dinosaurRequest);
@@ -73,6 +96,9 @@ public class HttpAdapter {
     }
 
     @DeleteMapping("/dinosaur/{id}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucessfull")
+    })
     public ResponseEntity<?> deleteDinosaur(@PathVariable Long id) {
         try {
             deleteDinosaurUseCase.deleteDinosaur(id);

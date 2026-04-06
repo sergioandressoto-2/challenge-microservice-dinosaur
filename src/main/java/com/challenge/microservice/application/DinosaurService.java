@@ -45,7 +45,8 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
                 req.getName(),
                 req.getSpecies(),
                 req.getDiscoveryDate(),
-                req.getExtinctionDate()
+                req.getExtinctionDate(),
+                req.getStatus()
         );
         Dinosaur saved = repositoryPort.save(dinosaur);
         return toResponse(saved);
@@ -73,9 +74,16 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
         Dinosaur dinosaur = repositoryPort.findById(id)
                 .orElseThrow(() -> new DinosaurNotFoundException(id));
         Status previousStatus = dinosaur.getStatus();
-        Status newStatus = Status.valueOf(req.getStatus());
-        dinosaur.updateDetails(req.getName(), req.getSpecies(), req.getDiscoveryDate(), req.getExtinctionDate(), newStatus);
+        Status newStatus;
+        try {
+            newStatus = Status.valueOf(req.getStatus());
+        } catch  (IllegalArgumentException e) {
+            throw new DomainException("Invalid status value: " + req.getStatus());
+           }
+        dinosaur.updateDetails(req.getName(), req.getSpecies(), req.getDiscoveryDate(),
+                req.getExtinctionDate(), newStatus);
         repositoryPort.save(dinosaur);
+
         if (previousStatus != newStatus) {
             notificationPort.notifyStatusChange(new StatusNotificationMessage(id, newStatus.name(), LocalDateTime.now()));
         }

@@ -20,7 +20,7 @@ class DinosaurTest {
         Date discovery = past();
         Date extinction = future();
 
-        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", discovery, extinction);
+        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", discovery, extinction, "ALIVE");
 
         assertThat(d.getId()).isNull();
         assertThat(d.getName()).isEqualTo("T-Rex");
@@ -32,7 +32,7 @@ class DinosaurTest {
 
     @Test
     void constructor_throwsDomainException_whenDiscoveryAfterExtinction() {
-        assertThatThrownBy(() -> new Dinosaur("T-Rex", "Tyrannosaurus", future(), past()))
+        assertThatThrownBy(() -> new Dinosaur("T-Rex", "Tyrannosaurus", future(), past(), "ALIVE"))
                 .isInstanceOf(DomainException.class)
                 .hasMessageContaining("discoveryDate must be before extinction date");
     }
@@ -40,26 +40,40 @@ class DinosaurTest {
     @Test
     void constructor_throwsDomainException_whenDiscoveryEqualsExtinction() {
         Date same = new Date();
-        assertThatThrownBy(() -> new Dinosaur("T-Rex", "Tyrannosaurus", same, same))
+        assertThatThrownBy(() -> new Dinosaur("T-Rex", "Tyrannosaurus", same, same, "ALIVE"))
                 .isInstanceOf(DomainException.class);
     }
 
     @Test
     void constructor_allowsBothDatesNull() {
-        assertThatCode(() -> new Dinosaur("T-Rex", "Tyrannosaurus", null, null))
+        assertThatCode(() -> new Dinosaur("T-Rex", "Tyrannosaurus", null, null, "ALIVE"))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void constructor_allowsNullDiscoveryDate() {
-        assertThatCode(() -> new Dinosaur("T-Rex", "Tyrannosaurus", null, future()))
+        assertThatCode(() -> new Dinosaur("T-Rex", "Tyrannosaurus", null, future(), "ALIVE"))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void constructor_allowsNullExtinctionDate() {
-        assertThatCode(() -> new Dinosaur("T-Rex", "Tyrannosaurus", past(), null))
+        assertThatCode(() -> new Dinosaur("T-Rex", "Tyrannosaurus", past(), null, "ALIVE"))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void constructor_throwsDomainException_whenStatusIsInvalid() {
+        assertThatThrownBy(() -> new Dinosaur("T-Rex", "Tyrannosaurus", past(), future(), "INVALID"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Invalid status value: INVALID");
+    }
+
+    @Test
+    void constructor_throwsDomainException_whenStatusIsNotAlive() {
+        assertThatThrownBy(() -> new Dinosaur("T-Rex", "Tyrannosaurus", past(), future(), "ENDANGERED"))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("Initial status must be ALIVE");
     }
 
     // -------------------------------------------------------------------------
@@ -93,7 +107,7 @@ class DinosaurTest {
 
     @Test
     void updateDetails_updatesAllFields() {
-        Dinosaur d = new Dinosaur("T-Rex", "Old Species", past(), future());
+        Dinosaur d = new Dinosaur("T-Rex", "Old Species", past(), future(), "ALIVE");
         Date newDiscovery = new Date(System.currentTimeMillis() - 172_800_000L);
         Date newExtinction = new Date(System.currentTimeMillis() + 172_800_000L);
 
@@ -108,7 +122,7 @@ class DinosaurTest {
 
     @Test
     void updateDetails_updatesStatusToExtinct() {
-        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", past(), future());
+        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", past(), future(), "ALIVE");
 
         d.updateDetails("T-Rex", "Tyrannosaurus", past(), future(), Status.EXTINCT);
 
@@ -126,7 +140,7 @@ class DinosaurTest {
 
     @Test
     void updateDetails_throwsDomainException_whenInvalidDates() {
-        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", null, null);
+        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", null, null, "ALIVE");
 
         assertThatThrownBy(() -> d.updateDetails("T-Rex", "Tyrannosaurus", future(), past(), Status.ALIVE))
                 .isInstanceOf(DomainException.class)
@@ -135,7 +149,7 @@ class DinosaurTest {
 
     @Test
     void updateDetails_allowsNullDates() {
-        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", past(), future());
+        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", past(), future(), "ALIVE");
 
         assertThatCode(() -> d.updateDetails("T-Rex", "Tyrannosaurus", null, null, Status.ALIVE))
                 .doesNotThrowAnyException();
@@ -147,7 +161,7 @@ class DinosaurTest {
 
     @Test
     void updateStatus_fromAlive_toEndangered() {
-        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", null, null);
+        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", null, null, "ALIVE");
 
         d.updateStatus(Status.ENDANGERED);
 
@@ -156,7 +170,7 @@ class DinosaurTest {
 
     @Test
     void updateStatus_fromAlive_toExtinct() {
-        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", null, null);
+        Dinosaur d = new Dinosaur("T-Rex", "Tyrannosaurus", null, null, "ALIVE");
 
         d.updateStatus(Status.EXTINCT);
 

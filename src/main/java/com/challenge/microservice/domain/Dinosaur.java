@@ -13,8 +13,10 @@ public class Dinosaur {
      private Status status;
 
 
-     public Dinosaur(String name, String species, Date discovery, Date extinction) {
+     public Dinosaur(String name, String species, Date discovery, Date extinction, String status) {
           validateDates(discovery, extinction);
+          validateStatusIsValid(status);
+          validateStatusIsAlive(status);
           this.name = name;
           this.species = species;
           this.discoveryDate = discovery;
@@ -37,6 +39,7 @@ public class Dinosaur {
                throw new DomainException("Cannot update an extinct dinosaur.");
           }
           validateDates(discovery, extinction);
+          validateStatusIsValid(status.toString());
           this.name = name;
           this.species = species;
           this.discoveryDate = discovery;
@@ -47,6 +50,20 @@ public class Dinosaur {
      private void validateDates(Date discovery, Date extinction) {
           if (discovery != null && extinction != null && !discovery.before(extinction)) {
                throw new DomainException("discoveryDate must be before extinction date.");
+          }
+     }
+
+     private void validateStatusIsValid(String status) {
+          try {
+               Status.valueOf(status);
+          } catch (IllegalArgumentException | NullPointerException e) {
+               throw new DomainException("Invalid status value: " + status);
+          }
+     }
+
+     private void validateStatusIsAlive(String status) {
+          if (!Status.ALIVE.name().equals(status)) {
+               throw new DomainException("Initial status must be ALIVE.");
           }
      }
 

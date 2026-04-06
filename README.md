@@ -49,7 +49,7 @@ PostgreSQL / RabbitMQ
 
 - [ ] Java 21
 - [ ] Maven 3.9+
-- [ ] Docker Desktop 4.34+ con **"Allow the default Docker socket to be used"** habilitado
+- [ ] Docker Engine 29+ , testeado en docker desktop 4.34 con **"Allow the default Docker socket to be used"** habilitado
 - [ ] Docker Compose
 
 ---
@@ -123,6 +123,8 @@ Base path: `/api/v1/dinosaur`
 | PUT    | `/{id}`   | Actualizar dinosaurio        | 200    |
 | DELETE | `/{id}`   | Eliminar dinosaurio          | 200    |
 
+swagger path: http:localhost:8080/swagger-ui.html
+
 ### Ejemplo de request (POST / PUT)
 
 ```json
@@ -149,8 +151,9 @@ Base path: `/api/v1/dinosaur`
 
 - `discoveryDate` debe ser anterior a `extinctionDate`
 - No se puede actualizar un dinosaurio con estado `EXTINCT`
-- El estado no puede retroceder desde `EXTINCT`
+- No se puede modificar un dinosaurio en estado `EXTINCT`
 - El estado inicial siempre es `ALIVE`
+- Los valores posibles para status son ALIVE, ENDANGERED y EXTINCT.
 
 ---
 
@@ -213,13 +216,21 @@ mvn test -Dtest=DinosaurServiceTest#createDinosaur_savesWhenNameIsUnique
 
 ```bash
 # Ver exchanges
-docker exec challenge-microservice-dinosaur-rabbitmq-1 rabbitmqctl list_exchanges
+docker exec <nombre_container_broker> rabbitmqctl list_exchanges
 
 # Ver queues y mensajes pendientes
-docker exec challenge-microservice-dinosaur-rabbitmq-1 rabbitmqctl list_queues name messages messages_ready
+docker exec <nombre_container_broker> rabbitmqctl list_queues name messages messages_ready
 
 # Ver bindings
-docker exec challenge-microservice-dinosaur-rabbitmq-1 rabbitmqctl list_bindings
+docker exec <nombre_container_broker> rabbitmqctl list_bindings
+```
+
+La aplicación tiene un listener que está escuchando la cola notification.status.queue e imprime en el log el mensaje.
+
+Ejemplo:
+
+```bash
+2026-04-06T00:11:22.297Z  INFO 1 --- [dinosaur] [ntContainer#0-1] c.c.m.a.i.m.NotificationListener         : Notification received: dinosaurId=8 newStatus=EXTINCT timestamp=2026-04-06T00:11:22.285919792
 ```
 
 ---
