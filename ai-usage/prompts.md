@@ -1,3 +1,5 @@
+### Prompts Utilizados
+
 * Actúa como un arquitecto de software senior especializado en Java, Spring Boot y Arquitectura Hexagonal (Ports and Adapters).
 
 Este proyecto es el codebase en Spring Boot que implementa un ABM (Alta, Baja, Modificación) de dinosaurios. El objetivo del proyecto es aplicar correctamente los principios de arquitectura hexagonal.
@@ -64,7 +66,9 @@ con el formato json siguiente
    "newStatus": "ENDANGERED",
    "timestamp": "2023-10-01T09:00:00"
 } 
+* Definime un listener que este escuchando en la cola notification.status.queue con routing key notificacion e imprima en el log el mensaje recibido.
+* refactoriza para los casos de exception devolver una json con formato code : httpstatus.code message: e.getmessage().
 * me armas el archivo README.md con un esqueleto para documentar el stack y los requisitos y el paso a paso como configurar y ejecutar el proyecto.
-* defini e implementa un endpont sprint actuator /actuator/health que tenga una validacion de la aplicacion y el estado de la conexion con la db
+* defini e implementa un endpont sprint actuator /actuator/health que tenga una validación de la aplicacion y el estado de la conexion con la db
 * quiero refactorizar unificar los casos de uso getDinosaur y getDinosaurs en uno solo ReadDinosaurUseCase con los 2 metodos
 * Agrega springdoc-openapi-starter-webmvc-ui al pom.xml — genera documentación interactiva automáticamente en /swagger-ui.html
