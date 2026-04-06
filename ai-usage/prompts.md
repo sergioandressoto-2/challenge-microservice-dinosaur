@@ -63,4 +63,8 @@ con el formato json siguiente
    "dinosaurId": 1,
    "newStatus": "ENDANGERED",
    "timestamp": "2023-10-01T09:00:00"
-}
+} 
+* me armas el archivo README.md con un esqueleto para documentar el stack y los requisitos y el paso a paso como configurar y ejecutar el proyecto.
+* defini e implementa un endpont sprint actuator /actuator/health que tenga una validacion de la aplicacion y el estado de la conexion con la db
+* quiero refactorizar unificar los casos de uso getDinosaur y getDinosaurs en uno solo ReadDinosaurUseCase con los 2 metodos
+* Agrega springdoc-openapi-starter-webmvc-ui al pom.xml — genera documentación interactiva automáticamente en /swagger-ui.html

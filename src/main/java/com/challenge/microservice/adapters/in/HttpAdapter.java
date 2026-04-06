@@ -5,8 +5,7 @@ import com.challenge.microservice.application.dto.DinosaurResponse;
 import com.challenge.microservice.application.dto.ErrorResponse;
 import com.challenge.microservice.application.port.in.CreateDinosaurUseCase;
 import com.challenge.microservice.application.port.in.DeleteDinosaurUseCase;
-import com.challenge.microservice.application.port.in.GetDinosaurUseCase;
-import com.challenge.microservice.application.port.in.GetDinosaursUseCase;
+import com.challenge.microservice.application.port.in.ReadDinosaurUseCase;
 import com.challenge.microservice.application.port.in.UpdateDinosaurUseCase;
 import com.challenge.microservice.domain.DinosaurNotFoundException;
 import com.challenge.microservice.domain.DomainException;
@@ -21,19 +20,16 @@ import java.util.List;
 public class HttpAdapter {
 
     private final CreateDinosaurUseCase createDinosaurUseCase;
-    private final GetDinosaursUseCase getDinosaursUseCase;
-    private final GetDinosaurUseCase getDinosaurUseCase;
+    private final ReadDinosaurUseCase readDinosaurUseCase;
     private final UpdateDinosaurUseCase updateDinosaurUseCase;
     private final DeleteDinosaurUseCase deleteDinosaurUseCase;
 
     public HttpAdapter(CreateDinosaurUseCase createDinosaurUseCase,
-                       GetDinosaursUseCase getDinosaursUseCase,
-                       GetDinosaurUseCase getDinosaurUseCase,
+                       ReadDinosaurUseCase readDinosaurUseCase,
                        UpdateDinosaurUseCase updateDinosaurUseCase,
                        DeleteDinosaurUseCase deleteDinosaurUseCase) {
         this.createDinosaurUseCase = createDinosaurUseCase;
-        this.getDinosaursUseCase = getDinosaursUseCase;
-        this.getDinosaurUseCase = getDinosaurUseCase;
+        this.readDinosaurUseCase = readDinosaurUseCase;
         this.updateDinosaurUseCase = updateDinosaurUseCase;
         this.deleteDinosaurUseCase = deleteDinosaurUseCase;
     }
@@ -51,12 +47,12 @@ public class HttpAdapter {
 
     @GetMapping("/dinosaur")
     public ResponseEntity<List<DinosaurResponse>> returnDinosaurs() {
-        return ResponseEntity.ok(getDinosaursUseCase.getDinosaurs());
+        return ResponseEntity.ok(readDinosaurUseCase.getDinosaurs());
     }
 
     @GetMapping("/dinosaur/{id}")
     public ResponseEntity<?> returnDinosaur(@PathVariable Long id) {
-        return getDinosaurUseCase.getDinosaur(id)
+        return readDinosaurUseCase.getDinosaur(id)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Dinosaur not found with id: " + id)));

@@ -5,8 +5,7 @@ import com.challenge.microservice.application.dto.DinosaurResponse;
 import com.challenge.microservice.application.dto.StatusNotificationMessage;
 import com.challenge.microservice.application.port.in.CreateDinosaurUseCase;
 import com.challenge.microservice.application.port.in.DeleteDinosaurUseCase;
-import com.challenge.microservice.application.port.in.GetDinosaurUseCase;
-import com.challenge.microservice.application.port.in.GetDinosaursUseCase;
+import com.challenge.microservice.application.port.in.ReadDinosaurUseCase;
 import com.challenge.microservice.application.port.in.UpdateDinosaurUseCase;
 import com.challenge.microservice.application.port.out.DinosaurRepositoryPort;
 import com.challenge.microservice.application.port.out.NotificationPort;
@@ -24,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class DinosaurService implements CreateDinosaurUseCase, GetDinosaursUseCase, GetDinosaurUseCase, UpdateDinosaurUseCase, DeleteDinosaurUseCase {
+public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCase, UpdateDinosaurUseCase, DeleteDinosaurUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(DinosaurService.class);
 

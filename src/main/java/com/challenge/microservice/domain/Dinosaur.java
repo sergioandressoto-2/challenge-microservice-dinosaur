@@ -12,7 +12,7 @@ public class Dinosaur {
      private Date extinctionDate;
      private Status status;
 
-     // Constructor para crear un nuevo dinosaurio (sin id, lo genera la DB)
+
      public Dinosaur(String name, String species, Date discovery, Date extinction) {
           validateDates(discovery, extinction);
           this.name = name;
