@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,10 +61,11 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
     }
 
     @Override
-    public Optional<DinosaurResponse> getDinosaur(Long id) {
+    public DinosaurResponse getDinosaur(Long id) {
         log.info("Returning dinosaur from db, id: {}", id);
         return repositoryPort.findById(id)
-                .map(this::toResponse);
+                .map(this::toResponse)
+                .orElseThrow(() -> new DinosaurNotFoundException(id));
     }
 
     @Override

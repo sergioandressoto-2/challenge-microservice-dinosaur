@@ -163,18 +163,19 @@ class DinosaurServiceTest {
         Dinosaur d = buildDinosaur(1L, Status.ALIVE);
         when(repositoryPort.findById(1L)).thenReturn(Optional.of(d));
 
-        Optional<DinosaurResponse> result = service.getDinosaur(1L);
+        DinosaurResponse result = service.getDinosaur(1L);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(1L);
-        assertThat(result.get().getName()).isEqualTo("T-Rex");
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getName()).isEqualTo("T-Rex");
     }
 
     @Test
-    void getDinosaur_returnsEmptyOptional_whenNotFound() {
+    void getDinosaur_throwsDinosaurNotFoundException_whenNotFound() {
         when(repositoryPort.findById(99L)).thenReturn(Optional.empty());
 
-        assertThat(service.getDinosaur(99L)).isEmpty();
+        assertThatThrownBy(() -> service.getDinosaur(99L))
+                .isInstanceOf(DinosaurNotFoundException.class)
+                .hasMessageContaining("99");
     }
 
     @Test
@@ -182,7 +183,7 @@ class DinosaurServiceTest {
         Dinosaur d = new Dinosaur(3L, "Stego", "Stegosaurus", past, future, Status.ENDANGERED);
         when(repositoryPort.findById(3L)).thenReturn(Optional.of(d));
 
-        DinosaurResponse response = service.getDinosaur(3L).orElseThrow();
+        DinosaurResponse response = service.getDinosaur(3L);
 
         assertThat(response.getId()).isEqualTo(3L);
         assertThat(response.getName()).isEqualTo("Stego");
