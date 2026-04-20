@@ -9,17 +9,17 @@ import java.util.Date;
 @Data
 public class DinosaurRequest {
     @NotBlank(message = "name is required")
-    String name;
+    private String name;
 
     @NotBlank(message = "species is required")
-    String species;
+    private String species;
 
     @NotNull(message = "discoveryDate is required")
-    Date discoveryDate;
+    private Date discoveryDate;
 
     @NotNull(message = "extinctionDate is required")
-    Date extinctionDate;
+    private Date extinctionDate;
 
     @NotBlank(message = "status is required")
-    String status;
+    private String status;
 }

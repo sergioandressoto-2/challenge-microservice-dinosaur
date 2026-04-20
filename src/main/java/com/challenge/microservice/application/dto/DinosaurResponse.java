@@ -9,10 +9,10 @@ import java.util.Date;
 @Getter
 @Setter
 public class DinosaurResponse {
-    Long id;
-    String name;
-    String species;
-    Date discoveryDate;
-    Date extinctionDate;
-    String status;
+    private Long id;
+    private String name;
+    private String species;
+    private Date discoveryDate;
+    private Date extinctionDate;
+    private String status;
 }

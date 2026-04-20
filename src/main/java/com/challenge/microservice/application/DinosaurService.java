@@ -16,6 +16,7 @@ import com.challenge.microservice.domain.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +36,7 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
     }
 
     @Override
+    @Transactional
     public DinosaurResponse createDinosaur(DinosaurRequest req) {
         log.info("Creating dinosaur: {}, {}", req.getName(), req.getDiscoveryDate());
         if (repositoryPort.existsByName(req.getName())) {
@@ -52,6 +54,7 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DinosaurResponse> getDinosaurs() {
         log.info("Returning list of dinosaurs from db");
         return repositoryPort.findAll()
@@ -61,6 +64,7 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DinosaurResponse getDinosaur(Long id) {
         log.info("Returning dinosaur from db, id: {}", id);
         return repositoryPort.findById(id)
@@ -69,6 +73,7 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
     }
 
     @Override
+    @Transactional
     public void updateDinosaur(Long id, DinosaurRequest req) {
         log.info("Updating dinosaur, id: {}", id);
         Dinosaur dinosaur = repositoryPort.findById(id)
@@ -90,6 +95,7 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
     }
 
     @Override
+    @Transactional
     public void deleteDinosaur(Long id) {
         log.info("Deleting dinosaur, id: {}", id);
         repositoryPort.findById(id)
