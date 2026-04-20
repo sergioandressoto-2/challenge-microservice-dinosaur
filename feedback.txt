@@ -1,7 +1,7 @@
 1. Tests de integración no usan TestContainers
 El challenge lo pedía explícitamente: los tests de integración deben correr contra contenedores reales de PostgreSQL y RabbitMQ para representar un entorno fiel a producción. En su lugar, los tests usan H2 en memoria (mock de base de datos) y deshabilitan RabbitMQ. Sumado a esto, los tests fallan al ejecutarse.
 
-2. Manejo de excepciones sin @RestControllerAdvice
+2. Manejo de excepciones sin @RestControllerAdvice  OK
 El controller tiene bloques try/catch en cada método para manejar errores. Para un perfil senior se espera un handler centralizado con @RestControllerAdvice, que elimina la repetición, separa responsabilidades y facilita extender el manejo de errores sin tocar los endpoints.
 
 3. Encapsulación básica ausente en DTOs
@@ -16,7 +16,7 @@ application.properties tiene credenciales de RabbitMQ hardcodeadas (admin/admin)
 6. Uso de java.util.Date en lugar de java.time.LocalDateTime
 El challenge define fechas en formato ISO 8601 ("2023-12-31T23:59:59"). El tipo correcto en Java moderno es LocalDateTime. El uso de Date es legacy desde Java 8 y acarrea problemas de zona horaria y serialización.
 
-7. Sin validaciones en las DTOs de entrada
+7. Sin validaciones en las DTOs de entrada OK
 No se usan anotaciones de Bean Validation (@NotBlank, @NotNull, @Min, etc.) junto a @Valid en el controller. Cualquier request malformado llega al dominio sin validación previa.
 
 8. Cron dejado en valor de debug (no el del challenge)

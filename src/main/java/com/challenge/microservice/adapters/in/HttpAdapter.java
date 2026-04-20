@@ -9,6 +9,7 @@ import com.challenge.microservice.application.port.in.UpdateDinosaurUseCase;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class HttpAdapter {
             @ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "422", description = "Unprocessable entity")
     })
-    public ResponseEntity<DinosaurResponse> createDinosaur(@RequestBody DinosaurRequest dinosaurRequest) {
+    public ResponseEntity<DinosaurResponse> createDinosaur(@Valid @RequestBody DinosaurRequest dinosaurRequest) {
         DinosaurResponse created = createDinosaurUseCase.createDinosaur(dinosaurRequest);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -68,7 +69,7 @@ public class HttpAdapter {
             @ApiResponse(responseCode = "422", description = "Unprocessable entity"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<Void> updateDinosaur(@PathVariable Long id, @RequestBody DinosaurRequest dinosaurRequest) {
+    public ResponseEntity<Void> updateDinosaur(@PathVariable Long id, @Valid @RequestBody DinosaurRequest dinosaurRequest) {
         updateDinosaurUseCase.updateDinosaur(id, dinosaurRequest);
         return ResponseEntity.ok().build();
     }
