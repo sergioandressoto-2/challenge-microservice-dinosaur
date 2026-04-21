@@ -2,6 +2,7 @@ package com.challenge.microservice.adapters.in;
 
 import com.challenge.microservice.application.dto.DinosaurRequest;
 import com.challenge.microservice.application.dto.DinosaurResponse;
+import com.challenge.microservice.application.dto.PagedResponse;
 import com.challenge.microservice.application.port.in.CreateDinosaurUseCase;
 import com.challenge.microservice.application.port.in.DeleteDinosaurUseCase;
 import com.challenge.microservice.application.port.in.ReadDinosaurUseCase;
@@ -13,8 +14,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -48,10 +47,15 @@ public class HttpAdapter {
 
     @GetMapping("/dinosaur")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful")
+            @ApiResponse(responseCode = "200", description = "Successful"),
+            @ApiResponse(responseCode = "422", description = "Invalid status value")
     })
-    public ResponseEntity<List<DinosaurResponse>> returnDinosaurs() {
-        return ResponseEntity.ok(readDinosaurUseCase.getDinosaurs());
+    public ResponseEntity<PagedResponse<DinosaurResponse>> returnDinosaurs(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String species,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(readDinosaurUseCase.getDinosaurs(status, species, page, size));
     }
 
     @GetMapping("/dinosaur/{id}")

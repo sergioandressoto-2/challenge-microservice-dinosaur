@@ -2,6 +2,7 @@ package com.challenge.microservice.application;
 
 import com.challenge.microservice.application.dto.DinosaurRequest;
 import com.challenge.microservice.application.dto.DinosaurResponse;
+import com.challenge.microservice.application.dto.PagedResponse;
 import com.challenge.microservice.application.port.out.DinosaurRepositoryPort;
 import com.challenge.microservice.application.port.out.NotificationPort;
 import com.challenge.microservice.domain.Dinosaur;
@@ -117,34 +118,41 @@ class DinosaurServiceTest {
     // getDinosaurs
     // -------------------------------------------------------------------------
 
-    @Test
-    void getDinosaurs_returnsEmptyList_whenNoDinosaurs() {
-        when(repositoryPort.findAll()).thenReturn(List.of());
+    private PagedResponse<Dinosaur> pagedOf(Dinosaur... dinosaurs) {
+        List<Dinosaur> list = List.of(dinosaurs);
+        return new PagedResponse<>(list, 0, 10, list.size(), 1);
+    }
 
-        assertThat(service.getDinosaurs()).isEmpty();
+    @Test
+    void getDinosaurs_returnsEmptyPage_whenNoDinosaurs() {
+        when(repositoryPort.findWithFilters(null, null, 0, 10))
+                .thenReturn(new PagedResponse<>(List.of(), 0, 10, 0, 0));
+
+        PagedResponse<DinosaurResponse> result = service.getDinosaurs(null, null, 0, 10);
+
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
     void getDinosaurs_returnsMappedResponse_forEachDinosaur() {
         Dinosaur d1 = buildDinosaur(1L, Status.ALIVE);
         Dinosaur d2 = buildDinosaur(2L, Status.ENDANGERED);
-        when(repositoryPort.findAll()).thenReturn(List.of(d1, d2));
+        when(repositoryPort.findWithFilters(null, null, 0, 10)).thenReturn(pagedOf(d1, d2));
 
-        List<DinosaurResponse> result = service.getDinosaurs();
+        PagedResponse<DinosaurResponse> result = service.getDinosaurs(null, null, 0, 10);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(1L);
-        assertThat(result.get(0).getStatus()).isEqualTo("ALIVE");
-        assertThat(result.get(1).getId()).isEqualTo(2L);
-        assertThat(result.get(1).getStatus()).isEqualTo("ENDANGERED");
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getStatus()).isEqualTo("ALIVE");
+        assertThat(result.getContent().get(1).getStatus()).isEqualTo("ENDANGERED");
     }
 
     @Test
     void getDinosaurs_mapsAllFieldsCorrectly() {
         Dinosaur d = new Dinosaur(5L, "Raptor", "Velociraptor", past, future, Status.ALIVE);
-        when(repositoryPort.findAll()).thenReturn(List.of(d));
+        when(repositoryPort.findWithFilters(null, null, 0, 10)).thenReturn(pagedOf(d));
 
-        DinosaurResponse response = service.getDinosaurs().get(0);
+        DinosaurResponse response = service.getDinosaurs(null, null, 0, 10).getContent().get(0);
 
         assertThat(response.getId()).isEqualTo(5L);
         assertThat(response.getName()).isEqualTo("Raptor");
@@ -152,6 +160,37 @@ class DinosaurServiceTest {
         assertThat(response.getDiscoveryDate()).isEqualTo(past);
         assertThat(response.getExtinctionDate()).isEqualTo(future);
         assertThat(response.getStatus()).isEqualTo("ALIVE");
+    }
+
+    @Test
+    void getDinosaurs_throwsDomainException_whenInvalidStatus() {
+        assertThatThrownBy(() -> service.getDinosaurs("INVALID", null, 0, 10))
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("INVALID");
+
+        verify(repositoryPort, never()).findWithFilters(any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
+    void getDinosaurs_filtersOnlyByStatus_whenSpeciesIsNull() {
+        Dinosaur d = buildDinosaur(1L, Status.ALIVE);
+        when(repositoryPort.findWithFilters("ALIVE", null, 0, 10)).thenReturn(pagedOf(d));
+
+        PagedResponse<DinosaurResponse> result = service.getDinosaurs("ALIVE", null, 0, 10);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(repositoryPort).findWithFilters("ALIVE", null, 0, 10);
+    }
+
+    @Test
+    void getDinosaurs_filtersOnlyBySpecies_whenStatusIsNull() {
+        Dinosaur d = buildDinosaur(1L, Status.ALIVE);
+        when(repositoryPort.findWithFilters(null, "Tyrannosaurus", 0, 10)).thenReturn(pagedOf(d));
+
+        PagedResponse<DinosaurResponse> result = service.getDinosaurs(null, "Tyrannosaurus", 0, 10);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(repositoryPort).findWithFilters(null, "Tyrannosaurus", 0, 10);
     }
 
     // -------------------------------------------------------------------------

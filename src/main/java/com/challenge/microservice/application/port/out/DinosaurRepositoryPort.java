@@ -1,5 +1,6 @@
 package com.challenge.microservice.application.port.out;
 
+import com.challenge.microservice.application.dto.PagedResponse;
 import com.challenge.microservice.domain.Dinosaur;
 
 import java.util.Date;
@@ -8,7 +9,7 @@ import java.util.Optional;
 
 public interface DinosaurRepositoryPort {
     Dinosaur save(Dinosaur dinosaur);
-    List<Dinosaur> findAll();
+    PagedResponse<Dinosaur> findWithFilters(String status, String species, int page, int size);
     Optional<Dinosaur> findById(Long id);
     boolean existsByName(String name);
     void deleteById(Long id);

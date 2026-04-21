@@ -2,9 +2,13 @@ package com.challenge.microservice.adapters.out;
 
 import com.challenge.microservice.adapters.out.model.DinosaurEntity;
 import com.challenge.microservice.adapters.out.repository.DbRepository;
+import com.challenge.microservice.adapters.out.repository.DinosaurSpecification;
+import com.challenge.microservice.application.dto.PagedResponse;
 import com.challenge.microservice.application.port.out.DinosaurRepositoryPort;
 import com.challenge.microservice.domain.Dinosaur;
 import com.challenge.microservice.domain.Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -28,11 +32,16 @@ public class DbAdapter implements DinosaurRepositoryPort {
     }
 
     @Override
-    public List<Dinosaur> findAll() {
-        return dbRepository.findAll()
-                .stream()
+    public PagedResponse<Dinosaur> findWithFilters(String status, String species, int page, int size) {
+        Page<DinosaurEntity> result = dbRepository.findAll(
+                DinosaurSpecification.withFilters(status, species),
+                PageRequest.of(page, size)
+        );
+        List<Dinosaur> content = result.getContent().stream()
                 .map(this::mapEntityToDomain)
                 .collect(Collectors.toList());
+        return new PagedResponse<>(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
     }
 
     @Override

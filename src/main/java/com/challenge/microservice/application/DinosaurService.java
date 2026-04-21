@@ -2,6 +2,7 @@ package com.challenge.microservice.application;
 
 import com.challenge.microservice.application.dto.DinosaurRequest;
 import com.challenge.microservice.application.dto.DinosaurResponse;
+import com.challenge.microservice.application.dto.PagedResponse;
 import com.challenge.microservice.application.dto.StatusNotificationMessage;
 import com.challenge.microservice.application.port.in.CreateDinosaurUseCase;
 import com.challenge.microservice.application.port.in.DeleteDinosaurUseCase;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCase, UpdateDinosaurUseCase, DeleteDinosaurUseCase {
@@ -55,12 +55,21 @@ public class DinosaurService implements CreateDinosaurUseCase, ReadDinosaurUseCa
 
     @Override
     @Transactional(readOnly = true)
-    public List<DinosaurResponse> getDinosaurs() {
-        log.info("Returning list of dinosaurs from db");
-        return repositoryPort.findAll()
-                .stream()
+    public PagedResponse<DinosaurResponse> getDinosaurs(String status, String species, int page, int size) {
+        log.info("Returning dinosaurs — status={}, species={}, page={}, size={}", status, species, page, size);
+        if (status != null) {
+            try {
+                Status.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                throw new DomainException("Invalid status value: " + status);
+            }
+        }
+        PagedResponse<Dinosaur> result = repositoryPort.findWithFilters(status, species, page, size);
+        List<DinosaurResponse> content = result.getContent().stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
+        return new PagedResponse<>(content, result.getPage(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
     }
 
     @Override
