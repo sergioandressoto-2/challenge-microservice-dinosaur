@@ -4,13 +4,13 @@ El challenge lo pedía explícitamente: los tests de integración deben correr c
 2. Manejo de excepciones sin @RestControllerAdvice  OK
 El controller tiene bloques try/catch en cada método para manejar errores. Para un perfil senior se espera un handler centralizado con @RestControllerAdvice, que elimina la repetición, separa responsabilidades y facilita extender el manejo de errores sin tocar los endpoints.
 
-3. Encapsulación básica ausente en DTOs
+3. Encapsulación básica ausente en DTOs  OK
 Los campos de DinosaurRequest y DinosaurResponse no tienen modificador private. Aunque Lombok genera getters/setters, sin private los campos son accesibles directamente con visibilidad de paquete. Es un error de encapsulación elemental.
 
-4. GET /dinosaur sin paginado ni filtros
+4. GET /dinosaur sin paginado ni filtros OK
 El endpoint devuelve la lista completa de dinosaurios. En un contexto productivo —y especialmente para un perfil senior— se espera paginación (Pageable) y al menos filtros básicos por status o nombre, sin que esto haya sido marcado explícitamente en el enunciado (era un punto para que el candidato lo detecte solo).
 
-5. Credenciales hardcodeadas, sin uso de variables de entorno
+5. Credenciales hardcodeadas, sin uso de variables de entorno  OK
 application.properties tiene credenciales de RabbitMQ hardcodeadas (admin/admin). Para un microservicio productivo se esperan variables de entorno (${RABBITMQ_PASSWORD}) tanto en la configuración como en el docker-compose.yml. Esto es un problema de seguridad crítico.
 
 6. Uso de java.util.Date en lugar de java.time.LocalDateTime
@@ -19,8 +19,8 @@ El challenge define fechas en formato ISO 8601 ("2023-12-31T23:59:59"). El tipo 
 7. Sin validaciones en las DTOs de entrada OK
 No se usan anotaciones de Bean Validation (@NotBlank, @NotNull, @Min, etc.) junto a @Valid en el controller. Cualquier request malformado llega al dominio sin validación previa.
 
-8. Cron dejado en valor de debug (no el del challenge)
+8. Cron dejado en valor de debug (no el del challenge) OK
 application.properties tiene el scheduler configurado en 0 */2 * * * * (cada 2 minutos), no en 10 minutos como pide el challenge. El valor correcto está en el .env_template.
 
-9. .env_template
+9. .env_template  OK
 No es malo per se —docker-compose soporta nativamente el archivo .env—, pero en Java/Spring el estándar para manejar configuración por entorno son los perfiles de Spring (application-prod.properties, application-dev.properties) junto a variables de entorno inyectadas por el orquestador o el CI/CD.
